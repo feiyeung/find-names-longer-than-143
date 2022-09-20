@@ -21,3 +21,7 @@ To scan and list everything (regardless of longer than 143 or not), while saving
 ## Output format
 
     <number of bytes for the name> <whitespace> <quote> <fullpath> <quote>
+
+## Test
+
+A empty dir with non-Latin name is under the `test` dir. One can run the software against that dir to see if the filename size is accounted properly.
