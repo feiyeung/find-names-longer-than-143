@@ -1,11 +1,13 @@
 #include <dirent.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#define ECRYPTFS_FILENAME_MAX 143
+unsigned filename_max = 143;
+int v = 0;
 #define PATH_MAX 4096
 
 int walkdir(const char *dirname)
@@ -14,7 +16,6 @@ int walkdir(const char *dirname)
     struct dirent *entry;
     char path[PATH_MAX];
     unsigned int name_len;
-    FILE* outs;
 
     if (!(dir = opendir(dirname)))
         return 1;
@@ -25,8 +26,13 @@ int walkdir(const char *dirname)
 
         snprintf(path, sizeof(path), "%s/%s", dirname, entry->d_name);
         name_len = strlen(entry->d_name);
-        outs = (name_len <= ECRYPTFS_FILENAME_MAX) ? stderr : stdout ;
-        fprintf(outs, "%3lu \"%s\"\n", strlen(entry->d_name), path);
+        if (v) {
+            fprintf((name_len > filename_max) ? stdout : stderr,
+                    "%3lu \"%s\"\n", strlen(entry->d_name), path);
+        } else if (name_len > filename_max) {
+            fprintf(stdout,
+                    "%3lu \"%s\"\n", strlen(entry->d_name), path);
+        }
 
         if (entry->d_type == DT_DIR) {
             walkdir(path);
@@ -37,20 +43,32 @@ int walkdir(const char *dirname)
 }
 
 int main(int argc, char** argv) {
-    char* path;
-    if (argc < 2) {
-        path=getenv("PWD");
-        return walkdir(path);
-    } else {
-        int i, ret=0;
-        for (i = 1; i < argc; ++i) {
-            ret = walkdir(argv[i]);
-            if (!ret) return ret;
+    int opt;
+
+    while ((opt = getopt(argc, argv, "l:v")) != -1) {
+        switch (opt) {
+            case 'l': // override the size limit for checks
+                filename_max = (unsigned) strtoul(optarg, NULL, 0);
+                if (!filename_max) {
+                    fprintf(stderr, "failed to read filename size limit from %s\n", optarg);
+                    return 2;
+                }
+                fprintf(stderr, "filename size limit set to %u bytes\n", filename_max);
+                break;
+            case 'v': // verbose
+                ++v;
+                break;
+            case '?':
+                fprintf(stderr, "print usage?\n");
+            default:
+                return 1;
         }
     }
 
-    // fprintf(stderr, "launching from path \"%s\"\n\n", path);
-
-    return 0;
-
+    int idx, ret=0;
+    for (idx = optind; (idx < argc) && !ret; ++idx) {
+        fprintf(stderr, "walking: \"%s\"\n", argv[idx]);
+        ret |= walkdir(argv[idx]);
+    }
+    return ret;
 }
