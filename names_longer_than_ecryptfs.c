@@ -1,12 +1,12 @@
-#include <unistd.h>
-#include <sys/types.h>
 #include <dirent.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#define PATH_MAX 4096
 #define ECRYPTFS_FILENAME_MAX 143
+#define PATH_MAX 4096
 
 int walkdir(const char *dirname)
 {
