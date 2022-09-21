@@ -16,7 +16,11 @@ To scan a dir and list only entries whose names are more than 143 bytes, while s
 
 To scan and list everything (regardless of longer than 143 or not), while saving to a file:
 
-    ./whatever <path(s) to scan> 2>&1 | tee everything.txt
+    ./whatever -v <path(s) to scan> 2>&1 | tee everything.txt
+
+To scan a dir and list only entries whose names are more than 136 bytes, while saving to a file
+
+    ./whatever -l 136 <path(s) to scan> 2>/dev/null | tee gt136.txt
 
 ## Output format
 
