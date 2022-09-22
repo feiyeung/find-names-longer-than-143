@@ -22,6 +22,8 @@ To scan a dir and list only entries whose names are more than 136 bytes, while s
 
     ./whatever -l 136 <path(s) to scan> 2>/dev/null | tee gt136.txt
 
+(why 136? i had an issue when rsync'ing into a target with eCryptFS, and found that rsync would call mktemp at somepoint and that system of mine defaults to `.XXXXXX` that adds 7 bytes to the file names, so i had to find those with more than 136 bytes filenames and rename them)
+
 ## Output format
 
     <number of bytes for the name> <whitespace> <quote> <fullpath> <quote>
